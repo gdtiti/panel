@@ -33,12 +33,6 @@ wget -O install.sh https://github.com/gdtiti/panel/raw/master/install_6.0.sh && 
 或者
 wget -O install.sh https://github.com/gdtiti/panel/raw/master/install-ubuntu_6.0.sh && bash install-ubuntu_6.0.sh
 
-
---------------------------
-如果更新后未生效执行
-service bt restart
-重启宝塔面板
-
 --------------------------
 cd /www/server/panel && python tools.pyc panel 123456
 修改面板密码
@@ -54,3 +48,9 @@ cd /www/server/panel && python tools.pyc panel 123456
 在文本最后找到check_system()方法，在最后一句话加上#。然后重启服务器或者宝塔。
 
 #panelSite.panelSite().set_mt_conf()
+
+
+--------------------------
+如果更新后未生效执行
+service bt restart
+重启宝塔面板
