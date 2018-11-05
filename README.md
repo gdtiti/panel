@@ -5,12 +5,12 @@ updateLinuxBate
 需要手动替换路径
 
 1.安装
-wget -O install.sh https://github.com/gdtiti/panel/raw/master/install.sh && bash install.sh
+1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
 或者
 wget -O install.sh https://github.com/gdtiti/panel/raw/master/install-ubuntu.sh && bash install.sh
 
 2.单纯升级专业版
-wget -O update.sh https://github.com/gdtiti/panel/raw/master/install/update_pro.sh && bash update.sh pro
+wget -O update_pro.sh https://github.com/gdtiti/panel/raw/master/update_pro.sh && bash update_pro.sh pro
 
 3.从专业版降级到免费版
 wget -O update.sh http://download.bt.cn/install/update.sh && bash update.sh free
