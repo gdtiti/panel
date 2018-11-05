@@ -6,7 +6,7 @@ LANG=en_US.UTF-8
 
 echo "
 +----------------------------------------------------------------------
-| Bt-WebPanel 5.x FOR Ubuntu/Debian
+| Bt-WebPanel 6.x FOR Ubuntu/Debian
 +----------------------------------------------------------------------
 | Copyright © 2015-2018 BT-SOFT(http://www.bt.cn) All rights reserved.
 +----------------------------------------------------------------------
@@ -54,7 +54,7 @@ get_node_url(){
 		if [ -f /usr/local/curl/bin/curl ];then
 			ln -sf /usr/local/curl/bin/curl /bin/curl
 		else
-			yum install curl -y
+			apt install curl -y
 		fi
 	fi
 	for node in ${nodes[@]};
@@ -320,7 +320,9 @@ pipArg=''
 
 pip install setuptools
 #pip install --upgrade pip $pipArg
-pip install psutil chardet web.py virtualenv Pillow $pipArg
+#pip install psutil chardet web.py virtualenv Pillow $pipArg
+pip install itsdangerous==0.24
+pip install psutil chardet virtualenv Flask Flask-Session Flask-SocketIO flask-sqlalchemy Flask-APScheduler Pillow gunicorn pymysql gevent-websocket paramiko $pipArg
 
 
 Install_Pillow
@@ -330,7 +332,7 @@ if [  -f /www/server/mysql/bin/mysql ]; then
 	Install_mysqldb
 fi
 Install_chardet
-Install_webpy
+#Install_webpy
 
 mkdir -p $setup_path/server/panel/logs
 mkdir -p $setup_path/server/panel/vhost/apache
@@ -350,8 +352,8 @@ mkdir -p /www/wwwlogs
 mkdir -p /www/backup/database
 mkdir -p /www/backup/site
 
-wget -O panel.zip $download_Url/install/src/panel.zip -T 10
-wget -O /etc/init.d/bt $download_Url/install/src/bt.init -T 10
+wget -O panel.zip $download_Url/install/src/panel6.zip -T 10
+wget -O /etc/init.d/bt $download_Url/install/src/bt6.init -T 10
 if [ -f "$setup_path/server/panel/data/default.db" ];then
 	if [ -d "/$setup_path/server/panel/old_data" ];then
 		rm -rf $setup_path/server/panel/old_data
@@ -363,6 +365,7 @@ if [ -f "$setup_path/server/panel/data/default.db" ];then
 	mv -f $setup_path/server/panel/data/qiniuAs.conf $setup_path/server/panel/old_data/qiniuAs.conf
 	mv -f $setup_path/server/panel/data/iplist.txt $setup_path/server/panel/old_data/iplist.txt
 	mv -f $setup_path/server/panel/data/port.pl $setup_path/server/panel/old_data/port.pl
+	mv -f $setup_path/server/panel/data/admin_path.pl $setup_path/server/panel/old_data/admin_path.pl
 fi
 
 unzip -o panel.zip -d $setup_path/server/ > /dev/null
@@ -374,6 +377,7 @@ if [ -d "$setup_path/server/panel/old_data" ];then
 	mv -f $setup_path/server/panel/old_data/qiniuAs.conf $setup_path/server/panel/data/qiniuAs.conf
 	mv -f $setup_path/server/panel/old_data/iplist.txt $setup_path/server/panel/data/iplist.txt
 	mv -f $setup_path/server/panel/old_data/port.pl $setup_path/server/panel/data/port.pl
+	mv -f $setup_path/server/panel/old_data/admin_path.pl $setup_path/server/panel/data/admin_path.pl
 	
 	if [ -d "/$setup_path/server/panel/old_data" ];then
 		rm -rf $setup_path/server/panel/old_data
@@ -396,6 +400,7 @@ python -m compileall $setup_path/server/panel
 
 chmod 777 /tmp
 chmod +x /etc/init.d/bt
+ln -sf /etc/init.d/bt /usr/bin/bt
 update-rc.d bt defaults
 chmod -R 600 $setup_path/server/panel
 chmod +x $setup_path/server/panel/certbot-auto
@@ -403,19 +408,34 @@ chmod -R +x $setup_path/server/panel/script
 echo "$port" > $setup_path/server/panel/data/port.pl
 /etc/init.d/bt start
 password=`cat /dev/urandom | head -n 16 | md5sum | head -c 8`
+sleep 1
+admin_auth='/www/server/panel/data/admin_path.pl'
+if [ ! -f $admin_auth ];then
+	auth_path=`cat /dev/urandom | head -n 16 | md5sum | head -c 8`
+	echo "/$auth_path" > $admin_auth
+fi
+auth_path=`cat $admin_auth`
 cd $setup_path/server/panel/
+python -m py_compile tools.py
 python tools.py username
 username=`python tools.pyc panel $password`
 cd ~
 echo "$password" > $setup_path/server/panel/default.pl
 chmod 600 $setup_path/server/panel/default.pl
-
-isStart=`ps aux |grep 'python main.pyc'|grep -v grep|awk '{print $2}'`
+/etc/init.d/bt restart
+sleep 1
+isStart=`ps aux |grep 'gunicorn'|grep -v grep|awk '{print $2}'`
 if [ "$isStart" == '' ];then
 	echo -e "\033[31mERROR: The BT-Panel service startup failed.\033[0m";
 	echo '============================================'
 	exit;
 fi
+
+if [ ! -f /root/.ssh/id_rsa.pub ];then
+	ssh-keygen -q -t rsa -P "" -f /root/.ssh/id_rsa
+fi
+cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
+chmod 600 /root/.ssh/authorized_keys
 
 if [ ! -f "/usr/bin/ufw" ];then
 	apt-get install -y ufw
@@ -430,22 +450,21 @@ if [ -f "/usr/sbin/ufw" ];then
 	ufw reload
 fi
 
-pip install psutil chardet web.py psutil virtualenv $pipArg
+pip install psutil chardet psutil virtualenv $pipArg
 if [ ! -d '/etc/letsencrypt' ];then
-
+	mkdir -p /etc/letsencrypt
 	mkdir -p /var/spool/cron
 	if [ ! -f '/var/spool/cron/crontabs/root' ];then
 		echo '' > /var/spool/cron/crontabs/root
 		chmod 600 /var/spool/cron/crontabs/root
 	fi
-	isCron=`cat /var/spool/cron/crontabs/root|grep certbot.log`
-	if [ "${isCron}" == "" ];then
-		echo "30 2 * * * $setup_path/server/panel/certbot-auto renew >> $setup_path/server/panel/logs/certbot.log" >>  /var/spool/cron/crontabs/root
-		chown 600 /var/spool/cron/crontabs/root
-	fi
-	service cron restart
-	nohup $setup_path/server/panel/certbot-auto -n > /tmp/certbot-auto.log 2>&1 &
 fi
+
+wget -O acme_install.sh $download_Url/install/acme_install.sh
+nohup bash acme_install.sh &> /dev/null &
+sleep 1
+rm -f acme_install.sh
+
 if [[ "${deepinSys}" =~ eepin ]]; then
 	address="localhost"
 else
@@ -463,7 +482,7 @@ else
 		fi
 	fi
 	
-	ipCheck=`python -c "import re; print re.match('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$','$address')"`
+	ipCheck=`python -c "import re; print(re.match('^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$','$address'))"`
 	if [ "$address" == "None" ];then
 		address="SERVER_IP"
 	fi
@@ -473,7 +492,7 @@ else
 fi
 
 curl -sS --connect-timeout 10 -m 60 https://www.bt.cn/Api/SetupCount?type=Linux\&o=$1 > /dev/null 2>&1
-if [ $1 != "" ];then
+if [ "$1" != "" ];then
 	echo $1 > /www/server/panel/data/o.pl
 	cd /www/server/panel
 	python tools.py o
@@ -482,7 +501,7 @@ fi
 echo -e "=================================================================="
 echo -e "\033[32mCongratulations! Install succeeded!\033[0m"
 echo -e "=================================================================="
-echo -e "Bt-Panel: http://$address:$port"
+echo -e "Bt-Panel: http://$address:$port$auth_path"
 echo -e "username: $username"
 echo -e "password: $password"
 echo -e "\033[33mWarning:\033[0m"

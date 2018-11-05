@@ -3,6 +3,13 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 LANG=en_US.UTF-8
 
+if [ -d /www/server/panel/BTPanel ];then
+	echo '=============================================================='
+	echo '6.0面板不能执行此命令!'
+	echo '6.0的更新命令：curl https://github.com/gdtiti/panel/raw/master/update6.sh|bash'
+	exit 0;
+fi
+
 vp=$1
 m=`cat /www/server/panel/class/common.py|grep checkSafe`
 if [ "${vp}" == "free" ]; then
@@ -24,7 +31,7 @@ if [ ! -f $public_file ];then
 fi
 . $public_file
 
-download_Url='https://github.com/gdtiti/panel/raw/master'
+download_Url=$NODE_URL
 setup_path=/www
 version=''
 
@@ -76,6 +83,7 @@ if [ ! -f "/etc/init.d/bt" ]; then
 	wget -O /etc/init.d/bt $download_Url/install/src/bt.init -T 10
 	chmod +x /etc/init.d/bt
 fi
+
 cd /www/server/panel
 python tools.py o
 

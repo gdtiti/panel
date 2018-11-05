@@ -1,6 +1,6 @@
 #!/bin/bash
 get_node_url(){
-	nodes=(http://125.88.182.172:5880 http://103.224.251.67 http://128.1.164.196);
+	nodes=(https://github.com/gdtiti/panel/raw/master);
 	i=1;
 	for node in ${nodes[@]};
 	do
@@ -27,7 +27,7 @@ get_node_url(){
 		fi
 	done
 	if [ $j = 5000 ];then
-		NODE_URL='http://download.bt.cn';
+		NODE_URL='https://github.com/gdtiti/panel/raw/master';
 	else
 		NODE_URL=${urls[$j]}
 	fi
