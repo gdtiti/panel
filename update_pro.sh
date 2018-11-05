@@ -12,7 +12,7 @@ elif [ "${vp}" == "pro" ] || [ "${m}" != "" ] ;then
 	vp="_pro"
 	Ver="专业版"
 elif [ -f /www/server/panel/plugin/beta/config.conf ]; then
-	updateApi=https://github.com/gdtiti/panel/raw/master/updateLinuxBeta
+	updateApi=https://github.com/gdtiti/panel/raw/master/updateLinuxBeta.txt
 	vp=""
 	Ver="内测版"
 fi
@@ -38,7 +38,7 @@ fi
 
 if [ "$version" = '' ];then
 	if [ "${updateApi}" == "" ];then
-		updateApi=https://github.com/gdtiti/panel/raw/master/updateLinux
+		updateApi=https://github.com/gdtiti/panel/raw/master/updateLinux.txt
 	fi
 	if [ -f /usr/local/curl/bin/curl ]; then
 		version=`/usr/local/curl/bin/curl $updateApi 2>/dev/null|grep -Po '"version":".*?"'|grep -Po '[0-9\.]+'`
