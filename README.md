@@ -5,7 +5,7 @@ updateLinuxBate
 需要手动替换路径
 
 1.安装
-1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+wget -O install.sh https://github.com/gdtiti/panel/raw/master/install.sh && bash install.sh
 或者
 wget -O install.sh https://github.com/gdtiti/panel/raw/master/install-ubuntu.sh && bash install.sh
 
