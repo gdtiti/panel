@@ -54,3 +54,28 @@ cd /www/server/panel && python tools.pyc panel 123456
 如果更新后未生效执行
 service bt restart
 重启宝塔面板
+
+
+===我的使用顺序=====================================================
+1、安装
+wget -O install.sh https://github.com/gdtiti/panel/raw/master/install.sh && bash install.sh
+2、升级专业版
+wget -O update_pro.sh https://github.com/gdtiti/panel/raw/master/update_pro.sh && bash update_pro.sh pro
+3、破解
+wget https://github.com/gdtiti/panel/raw/master/bt_Crack2.sh && chmod 755 bt_Crack2.sh && bash bt_Crack2.sh
+4、再次升级专业版
+wget -O update_pro.sh https://github.com/gdtiti/panel/raw/master/update_pro.sh && bash update_pro.sh pro
+5、再次破解
+wget https://github.com/gdtiti/panel/raw/master/bt_Crack2.sh && chmod 755 bt_Crack2.sh && bash bt_Crack2.sh
+6、修改main.py
+2018/09/24:  破解后面板无法启动。
+
+删除 /www/server/panel/main.pyc
+
+修改 /www/server/panel/main.py
+
+在文本最后找到check_system()方法，在最后一句话加上#。然后重启服务器或者宝塔。
+
+#panelSite.panelSite().set_mt_conf()
+
+之所以两次升级专业版 两次破解 估计是升级专业版时少了文件 需要靠破解覆盖以后再次升级才完整 暂时这样可以完美安装我就不再研究为啥了
