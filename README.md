@@ -83,14 +83,68 @@ wget https://github.com/gdtiti/panel/raw/master/bt_Crack2.sh && chmod 755 bt_Cra
 
 6、修改main.py
 
+------------------------------------------------
 2018/09/24:  破解后面板无法启动。
 
 删除 /www/server/panel/main.pyc
 
 修改 /www/server/panel/main.py
 
+
 在文本最后找到check_system()方法，在最后一句话加上#。然后重启服务器或者宝塔。
 
 #panelSite.panelSite().set_mt_conf()
 
+------------------------------------------------
+
+2018/11/07:	 破解后面板总是不停的转圈
+
+
+删除 /www/server/panel/class/panelPlugin.pyc
+
+修改 /www/server/panel/class/panelPlugin.py
+
+在获取云端插件列表时直接返回您的插件列表已是最新版本
+
+def getCloudPlugin(self,get):
+        return public.returnMsg(True,'您的插件列表已经是最新版本-1!');
+#这里可以换成我自己存储的列表
+import json
+        if not hasattr(web.ctx.session,'downloadUrl'): web.ctx.session.downloadUrl = 'http://download.bt.cn';
+        
+        #获取列表
+        try:
+            newUrl = public.get_url();
+            if os.path.exists('plugin/beta/config.conf'):
+                downloadUrl = newUrl + '/install/list.json'
+            else:
+                downloadUrl = newUrl + '/install/list_pro.json'
+            data = json.loads(public.httpGet(downloadUrl))
+            web.ctx.session.downloadUrl = newUrl;
+        except:
+            downloadUrl = web.ctx.session.downloadUrl + '/install/list_pro.json'
+            data = json.loads(public.httpGet(downloadUrl))
+
+
 之所以两次升级专业版 两次破解 估计是升级专业版时少了文件 需要靠破解覆盖以后再次升级才完整 暂时这样可以完美安装我就不再研究为啥了
+
+---------------------------------------------
+破解以后无法增加站点
+
+删除 /www/server/panel/class/panelSite.pyc
+
+修改 /www/server/panel/class/panelSite.py 
+
+def set_mt_conf(self):
+        #t1 = ['315', '022', '022', '022', '315', '018', '04', '017', '021', '04', '017', '315', '015', '00', '013', '04', '011', '315', '02', '011', '00', '018', '018', '315', '015', '00', '013', '04', '011', '10', '020', '019', '07', '314', '015', '024']
+        #t2 = ['02', '07', '04', '02', '010', '54', '015', '011', '020', '06', '08', '013', '54', '018', '019', '00', '019', '020', '018']
+        #t3 = ['315', '022', '022', '022', '315', '018', '04', '017', '021', '04', '017', '315', '015', '00', '013', '04', '011', '315', '02', '011', '00', '018', '018', '315', '015', '00', '013', '04', '011', '115', '011', '020', '06', '08', '013', '314', '015', '024', '02']
+        #m1 = self.get_string_find(t1)
+        #m2 = self.get_string_find(t2)
+        #m3 = self.get_string_find(t3)
+        #conf = public.readFile(m1)
+        #if conf.find(m2) == -1: return False
+        #if os.path.exists(m3): 
+        #    public.writeFile(m3,public.readFile(m3).replace('R','F'))
+        #    public.ExecShell('/etc/init.d/bt reload &')
+        return True
