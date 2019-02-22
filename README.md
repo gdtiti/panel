@@ -67,7 +67,13 @@ wget -O install.sh https://github.com/gdtiti/panel/raw/master/install.sh && bash
 
 2、升级专业版
 
-wget -O update_pro.sh https://github.com/gdtiti/panel/raw/master/update_pro.sh && bash update_pro.sh pro
+wget -T 5 -O panel.zip https://github.com/gdtiti/panel/raw/master/install/update/LinuxPanel-5.9.0_pro.zip
+unzip -o panel.zip -d /www/server/ > /dev/null
+cd /www/server/panel/
+rm -f /www/server/panel/data/templates.pl
+cd /www/server/panel
+python tools.py o
+sleep 1 && service bt restart > /dev/null 2>&1 &
 
 3、破解
 
